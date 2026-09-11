@@ -201,6 +201,34 @@ describe("CloudflaredQuickTunnel", () => {
     expect(cancelBody).toHaveBeenCalledTimes(1);
     await tunnel.stop();
   });
+
+  it("accepts a registered tunnel when local policy blocks the public health probe", async () => {
+    const accessDenied = new TypeError("fetch failed") as TypeError & { cause?: { code: string } };
+    accessDenied.cause = { code: "EACCES" };
+    const { child, tunnel } = setupTunnel(async () => {
+      throw accessDenied;
+    });
+    const starting = tunnel.start(3333);
+    announceUrl(child);
+    child.stderr.write("INF Registered tunnel connection connIndex=0\n");
+
+    await expect(starting).resolves.toBe(QUICK_URL);
+    expect(tunnel.status()).toMatchObject({ running: true, url: QUICK_URL });
+    await tunnel.stop();
+  });
+
+  it("does not accept a registered tunnel for generic health probe failures", async () => {
+    const { child, tunnel } = setupTunnel(async () => {
+      throw new TypeError("fetch failed");
+    }, 20);
+    const starting = tunnel.start(3333);
+    announceUrl(child);
+    child.stderr.write("INF Registered tunnel connection connIndex=0\n");
+
+    await expect(starting).rejects.toThrow(/timed out/i);
+    expect(child.kill).toHaveBeenCalledWith("SIGTERM");
+    expect(tunnel.status()).toMatchObject({ running: false, url: null });
+  });
 });
 
 describe("normalizeNamedTunnelHostname", () => {

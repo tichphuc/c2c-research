@@ -8,6 +8,7 @@ import type { TunnelDoctorReport, TunnelProvider, TunnelStatus } from "./provide
 
 const QUICK_TUNNEL_URL_RE = /https:\/\/[^\s|]+/gi;
 const QUICK_TUNNEL_HOST_RE = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)\.trycloudflare\.com$/i;
+const REGISTERED_TUNNEL_RE = /\bregistered tunnel connection\b/i;
 const HEALTH_CHECK_INTERVAL_MS = 250;
 const HEALTH_CHECK_TIMEOUT_MS = 5_000;
 
@@ -15,6 +16,21 @@ function isBridgeHealth(payload: unknown): boolean {
   if (!payload || typeof payload !== "object") return false;
   const health = payload as Record<string, unknown>;
   return health.service === SERVICE_NAME && health.status === "ok";
+}
+
+function canTrustRegisteredTunnelAfterHealthFailure(error: unknown): boolean {
+  const cause = (error as { cause?: unknown } | null)?.cause;
+  const codes = [cause, ...(((cause as { errors?: unknown[] } | null)?.errors ?? []) as unknown[])]
+    .map((item) => (item as { code?: unknown } | null)?.code)
+    .filter(Boolean);
+  return codes.includes("EACCES");
+}
+
+function errorCodes(error: unknown): string[] {
+  const cause = (error as { cause?: unknown } | null)?.cause;
+  return [cause, ...(((cause as { errors?: unknown[] } | null)?.errors ?? []) as unknown[])]
+    .map((item) => (item as { code?: unknown } | null)?.code)
+    .filter((code): code is string => typeof code === "string");
 }
 
 async function bridgeHealth(
@@ -82,7 +98,7 @@ export class CloudflaredQuickTunnel implements TunnelProvider {
     private readonly binaryOverride?: string,
     options: CloudflaredQuickTunnelOptions = {}
   ) {
-    this.startTimeoutMs = options.startTimeoutMs ?? 45_000;
+    this.startTimeoutMs = options.startTimeoutMs ?? 80_000;
     this.spawnImpl = options.spawnImpl ?? ((command, args, spawnOptions) => spawn(command, args, spawnOptions));
     this.fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
   }
@@ -130,6 +146,8 @@ export class CloudflaredQuickTunnel implements TunnelProvider {
       this.lastError = null;
       let settled = false;
       let candidateUrl: string | null = null;
+      let registered = false;
+      let healthProbeUnavailable = false;
       let cancel: (() => void) | null = null;
       let timeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -187,6 +205,15 @@ export class CloudflaredQuickTunnel implements TunnelProvider {
         );
       };
 
+      const readyIfRegisteredAndHealthUnavailable = (): boolean => {
+        if (!candidateUrl || !registered || !healthProbeUnavailable) return false;
+        this.logger.info(
+          `Quick tunnel health check was unavailable locally; accepting registered tunnel: ${candidateUrl}`
+        );
+        ready(candidateUrl);
+        return true;
+      };
+
       const waitForHealth = async (): Promise<void> => {
         const publicUrl = candidateUrl;
         if (!publicUrl) return;
@@ -207,6 +234,15 @@ export class CloudflaredQuickTunnel implements TunnelProvider {
           } catch (error) {
             if (settled) return;
             this.lastError = error instanceof Error ? error.message : String(error);
+            this.logger.debug("Quick tunnel health check threw", {
+              message: this.lastError,
+              codes: errorCodes(error),
+              registered,
+            });
+            if (canTrustRegisteredTunnelAfterHealthFailure(error)) {
+              healthProbeUnavailable = true;
+              if (readyIfRegisteredAndHealthUnavailable()) return;
+            }
           }
           if (settled) return;
           await new Promise((resolveWait) => setTimeout(resolveWait, HEALTH_CHECK_INTERVAL_MS));
@@ -223,12 +259,17 @@ export class CloudflaredQuickTunnel implements TunnelProvider {
       const scan = (stream: NodeJS.ReadableStream): void => {
         const rl = readline.createInterface({ input: stream });
         rl.on("line", (line) => {
+          this.logger.debug(`cloudflared: ${line.slice(0, 400)}`);
           const url = parseQuickTunnelUrl(line);
           if (url && !candidateUrl) {
             candidateUrl = url;
             void waitForHealth().catch((error) => {
               this.logger.error(`Quick tunnel health check failed: ${String(error)}`);
             });
+          }
+          if (REGISTERED_TUNNEL_RE.test(line)) {
+            registered = true;
+            readyIfRegisteredAndHealthUnavailable();
           }
           if (/\b(?:ERR|error|failed|fatal)\b/i.test(line)) {
             this.lastError = line.slice(0, 400);
