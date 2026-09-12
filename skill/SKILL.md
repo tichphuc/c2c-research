@@ -18,6 +18,22 @@ The C2C Bridge gives ChatGPT read-only MCP access to the current workspace, so
 control messages between you and ChatGPT stay tiny (< 1 KB) — ChatGPT pulls
 whatever data it needs by itself.
 
+## Operating Mode
+
+Default to `MODE: SOFTWARE` for all tasks. This preserves the existing
+software planning, execution, and review behavior.
+
+Enter `MODE: RESEARCH` only when the user explicitly asks for C2C Research,
+Research Mode, a scientific experiment workflow, or an equally explicit
+scientific-research workflow. Ambiguous coding, debugging, data-processing,
+or data-analysis tasks stay in `MODE: SOFTWARE`.
+
+In `MODE: RESEARCH`, the roles are:
+
+- ChatGPT = Scientific Architect / Hypothesis Designer / Experiment Designer /
+  Scientific Reviewer / Evidence Interpreter.
+- Codex = Research Software Engineer / Experiment Executor.
+
 **Golden rules**
 
 1. NEVER paste file contents, diffs, or logs into ChatGPT. ChatGPT reads them through MCP.
