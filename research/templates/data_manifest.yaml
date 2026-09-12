@@ -1,0 +1,6 @@
+datasets:
+  - name: "<dataset name>"
+    version: "<dataset version>"
+    source_reference: "<source or reference>"
+    role: "<training | validation | test | baseline | auxiliary>"
+    notes: "<notes>"

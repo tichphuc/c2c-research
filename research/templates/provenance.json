@@ -1,0 +1,9 @@
+{
+  "experiment": "E001",
+  "run": "run_001",
+  "git_commit": "<git commit>",
+  "dataset_version": "<dataset version>",
+  "config": "<config path or parameters>",
+  "seed": 42,
+  "command": "<execution command>"
+}

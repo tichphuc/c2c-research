@@ -1,0 +1,12 @@
+hypothesis_id: H001
+
+statement:
+  "<hypothesis statement>"
+
+status: proposed
+
+supporting_experiments: []
+
+contradicting_experiments: []
+
+decision: unresolved

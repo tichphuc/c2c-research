@@ -1,0 +1,6 @@
+research_question: "<research question>"
+target_variable: "<target variable>"
+primary_metric: "<primary metric>"
+validation_strategy: "<validation strategy>"
+reproducibility_requirements:
+  - "<required seed, config, data version, command, or environment detail>"

@@ -1,0 +1,6 @@
+baselines:
+  - baseline_id: "baseline_001"
+    name: "<baseline name>"
+    description: "<baseline definition>"
+    config: "<config path or parameters>"
+    notes: "<notes>"

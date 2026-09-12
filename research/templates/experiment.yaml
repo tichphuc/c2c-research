@@ -1,0 +1,23 @@
+experiment_id: E001
+
+hypothesis: H001
+
+question:
+  "<experiment question>"
+
+control:
+  "<control or baseline configuration>"
+
+treatment:
+  "<treatment configuration>"
+
+controlled_variables:
+  preprocessing: "<same or specified preprocessing>"
+  split: "<same or specified data split>"
+
+metrics:
+  - "<primary metric>"
+
+success_criteria:
+  primary_metric: "<primary metric>"
+  criterion: "<success criterion>"
