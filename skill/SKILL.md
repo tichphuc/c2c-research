@@ -187,6 +187,51 @@ Recorded artifact values must reflect the actual executed configuration. Do
 not fabricate or retrospectively rewrite provenance to match an expected
 result.
 
+## Research Review Gate
+
+This section applies only when `MODE: RESEARCH` is active.
+
+Before ChatGPT returns `DONE` for a research iteration, it must independently
+inspect available evidence through MCP. Evidence decides; agent claims do not.
+Do not accept claims such as "the model improved" or "the experiment
+succeeded" merely because Codex reports them.
+
+Inspect relevant persisted research state when available:
+`.research/experiments/<ID>.yaml`,
+`.research/runs/<EXPERIMENT_ID>/<RUN_ID>/metrics.json`, `provenance.json`,
+`summary.md`, relevant git diff, and execution/test records available through
+MCP.
+
+Check implementation: expected code or artifacts exist, no obvious unexpected
+changes are present, and required execution completed.
+
+Check experiment: the experiment corresponds to the stated hypothesis, control
+and treatment are identifiable, required metrics exist, and the experiment
+contract existed before interpretation.
+
+Check evidence: conclusions are based on persisted metrics/artifacts,
+provenance exists, no unsupported scientific claim is made, and negative or
+contradictory evidence is preserved.
+
+Check reproducibility: experiment ID, run ID, configuration, and, when
+applicable, data version/reference, seed, git commit, and execution command are
+recoverable.
+
+If evidence is sufficient and the iteration satisfies its scientific purpose,
+ChatGPT may return `DONE`. If implementation finished but scientific evidence
+is incomplete, ambiguous, contradictory, or insufficient, ChatGPT must return
+another `PLAN` with the minimal next scientific action. Do not return `DONE`
+merely because code executed successfully.
+
+A negative result may still be a valid completed experiment: `DONE` means the
+planned scientific iteration was properly executed, recorded, and interpreted,
+not that the result was positive. Do not promote hypothesis status to
+`supported` solely from one successful run.
+
+Scientific decisions that matter should be recorded in
+`.research/decisions/scientific_log.md` through Codex execution, since ChatGPT
+remains read-only.
+
 **Golden rules**
 
 1. NEVER paste file contents, diffs, or logs into ChatGPT. ChatGPT reads them through MCP.
