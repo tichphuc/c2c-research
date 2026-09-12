@@ -148,6 +148,45 @@ new experiment ID or an explicit new version with clear provenance. Do not
 rewrite history silently. A failed experiment remains a valid experiment
 record; do not delete it simply because the result is negative.
 
+## Research Runs
+
+This section applies only when `MODE: RESEARCH` is active.
+
+Store run artifacts in the user's workspace at
+`.research/runs/<EXPERIMENT_ID>/<RUN_ID>/`, for example
+`.research/runs/E001/run_001/`. Use stable, explicit run IDs such as
+`run_001`, `run_002`, and `run_003`.
+
+Each completed research run should persist at minimum `metrics.json`,
+`provenance.json`, and `summary.md`. `diagnostics.json` is optional and
+recommended when useful.
+
+`metrics.json` contains machine-readable measured results for the run and
+identifies at least `experiment`, `run`, and `metrics`.
+
+`provenance.json` records enough execution provenance to reproduce or audit
+the run. At minimum, when applicable, it identifies `experiment`, `run`,
+`git_commit`, dataset version or dataset reference, `config`, `seed`, and
+`command`.
+
+`summary.md` is a concise human-readable description of what was run, the
+observed result, important caveats or failures, and pointers to the saved
+metrics and provenance.
+
+Codex owns writing these run artifacts after execution. ChatGPT remains
+read-only and later reviews the persisted artifacts through MCP. Do not rely
+only on console output or chat history as scientific evidence; important
+research results must be persisted in `.research/`.
+
+Failed runs are still valid records when they produced scientifically relevant
+information. Preserve failure status or diagnostics instead of silently
+deleting the run. Do not overwrite an existing run directory blindly; use a
+new run ID or explicit retry/version when the run record already exists.
+
+Recorded artifact values must reflect the actual executed configuration. Do
+not fabricate or retrospectively rewrite provenance to match an expected
+result.
+
 **Golden rules**
 
 1. NEVER paste file contents, diffs, or logs into ChatGPT. ChatGPT reads them through MCP.
