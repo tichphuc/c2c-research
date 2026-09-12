@@ -50,6 +50,46 @@ If the essential research design is missing, the first research `PLAN` must
 focus on resolving or designing it instead of jumping directly into model
 implementation. ChatGPT remains read-only; Codex owns execution.
 
+## Research Scaffold
+
+This section applies only when `MODE: RESEARCH` is active.
+
+Treat `.research/` in the user's workspace as the canonical scientific memory
+layer. Conversation history is not the sole source of research state.
+
+When Research Mode starts, ChatGPT first checks whether `.research/` exists in
+the user's workspace. If it exists, inspect it and resume from the recorded
+state before proposing substantial new research work. If it does not exist,
+the first appropriate research `PLAN` should bootstrap this structure:
+
+```text
+.research/
+|-- research.yaml
+|-- data_manifest.yaml
+|-- baselines.yaml
+|-- hypotheses/
+|-- experiments/
+|-- runs/
+`-- decisions/
+    `-- scientific_log.md
+```
+
+Bootstrap from `<c2c checkout>/research/templates/` using only
+`research.yaml`, `data_manifest.yaml`, `baselines.yaml`, and
+`scientific_log.md`. Do not automatically create `H001.yaml` or `E001.yaml`;
+hypothesis and experiment files belong to later steps.
+
+Bootstrap is safe and idempotent: never overwrite an existing `.research/`
+file blindly, preserve existing scientific records, create only missing
+directories/files, and if existing state is incomplete or conflicts, inspect it
+and plan the minimal repair. The scaffold should establish or prepare to
+record the Research Boot fields: research question, target variable, data
+sources, baseline, validation strategy, primary metric, and reproducibility
+requirements.
+
+ChatGPT remains read-only: it plans the scaffold and required metadata. Codex
+creates directories/files and fills the planned values.
+
 **Golden rules**
 
 1. NEVER paste file contents, diffs, or logs into ChatGPT. ChatGPT reads them through MCP.
