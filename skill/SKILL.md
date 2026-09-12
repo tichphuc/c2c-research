@@ -90,6 +90,35 @@ requirements.
 ChatGPT remains read-only: it plans the scaffold and required metadata. Codex
 creates directories/files and fills the planned values.
 
+## Research Hypotheses
+
+This section applies only when `MODE: RESEARCH` is active.
+
+Use stable hypothesis IDs: `H001`, `H002`, `H003`, and so on. Each hypothesis
+is recorded in the user's workspace at `.research/hypotheses/<ID>.yaml`.
+
+Before testing a hypothesis, the research `PLAN` should ensure its hypothesis
+file exists and contains at least `hypothesis_id`, `statement`, `status`,
+`supporting_experiments`, `contradicting_experiments`, and `decision`.
+Initial status is `proposed`.
+
+Allowed v0.1 statuses are `proposed`, `testing`, `supported`,
+`partially_supported`, `not_supported`, `rejected`, and `superseded`.
+
+ChatGPT is responsible for scientific interpretation and for proposing
+status or decision changes. Codex only writes the approved research state.
+Codex must not independently decide that a hypothesis is supported, and a
+single successful run must not automatically set a hypothesis to `supported`.
+
+Link supporting and contradicting evidence through experiment IDs, for
+example `supporting_experiments: [E001]` and
+`contradicting_experiments: [E002]`. Preserve negative or contradictory
+results; do not delete or ignore them.
+
+If a hypothesis materially changes in meaning, do not silently rewrite the old
+scientific claim. Prefer a new hypothesis ID or explicitly mark the previous
+hypothesis as `superseded`.
+
 **Golden rules**
 
 1. NEVER paste file contents, diffs, or logs into ChatGPT. ChatGPT reads them through MCP.
