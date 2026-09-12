@@ -119,6 +119,35 @@ If a hypothesis materially changes in meaning, do not silently rewrite the old
 scientific claim. Prefer a new hypothesis ID or explicitly mark the previous
 hypothesis as `superseded`.
 
+## Research Experiments
+
+This section applies only when `MODE: RESEARCH` is active.
+
+Use stable experiment IDs: `E001`, `E002`, `E003`, and so on. Every experiment
+must be recorded before execution in the user's workspace at
+`.research/experiments/<ID>.yaml`.
+
+The experiment contract must exist before Codex runs the experiment. At
+minimum, it contains `experiment_id`, `hypothesis`, `question`, `control`,
+`treatment`, `controlled_variables`, `metrics`, and `success_criteria`. Link
+to a hypothesis ID when applicable, for example `H001`.
+
+ChatGPT designs or reviews the scientific experiment contract. Codex writes
+the approved contract and executes it. Codex must not silently change the
+hypothesis being tested, control definition, treatment definition, controlled
+variables, primary metric, or success criteria after seeing results.
+
+Control and treatment must be distinguishable enough for scientific
+interpretation. Controlled variables should make the comparison fair where
+applicable, such as same preprocessing, same data split, same seed policy, and
+same training budget. Metrics and success criteria must be defined before
+result interpretation.
+
+If a material scientific change is needed after results are observed, create a
+new experiment ID or an explicit new version with clear provenance. Do not
+rewrite history silently. A failed experiment remains a valid experiment
+record; do not delete it simply because the result is negative.
+
 **Golden rules**
 
 1. NEVER paste file contents, diffs, or logs into ChatGPT. ChatGPT reads them through MCP.
