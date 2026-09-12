@@ -34,6 +34,22 @@ In `MODE: RESEARCH`, the roles are:
   Scientific Reviewer / Evidence Interpreter.
 - Codex = Research Software Engineer / Experiment Executor.
 
+## Research Boot
+
+This section applies only when `MODE: RESEARCH` is active.
+
+Before substantial scientific or model implementation, ChatGPT must first
+establish the essential research design: research question, hypothesis or
+hypotheses, target variable, data sources, baseline, validation strategy,
+primary metric, and reproducibility requirements.
+
+When useful, ChatGPT may also identify secondary metrics, an ablation plan,
+an uncertainty plan, generalization tests, and stopping criteria.
+
+If the essential research design is missing, the first research `PLAN` must
+focus on resolving or designing it instead of jumping directly into model
+implementation. ChatGPT remains read-only; Codex owns execution.
+
 **Golden rules**
 
 1. NEVER paste file contents, diffs, or logs into ChatGPT. ChatGPT reads them through MCP.
